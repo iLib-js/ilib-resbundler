@@ -1,0 +1,27 @@
+{
+  "name": "ilib-resbundler",
+  "version": "1.0.0",
+  "description": "convert json resources to js file",
+  "main": "resbundler.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iLib-js/ilib-resbundler.git"
+  },
+  "author": {
+    "name": "Goun Lee",
+    "email": "goun.lee@lge.com"
+  },
+  "files": [
+    "README.md",
+    "LICENSE",
+    "resbundler.js"
+  ],
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/iLib-js/ilib-resbundler/issues"
+  },
+  "homepage": "https://github.com/iLib-js/ilib-resbundler#readme"
+}
