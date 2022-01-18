@@ -86,6 +86,27 @@ function manipulateKey(fullPath){
     return key;
 }
 
+function assemblFiles(dir){
+    var list = fs.readdirSync(dir);
+    list.forEach(function(file){
+        var fullPath = path.join(dir, file);
+        var stat = fs.statSync(fullPath);
+        if (stat && stat.isDirectory()){
+            assemblFiles(fullPath);
+        } else {
+            if (file === "strings.json"){
+                var data = fs.readFileSync(fullPath, "utf-8");
+                var dataKey = manipulateKey(fullPath);
+                if (data) {
+                    var temp = dataKey +  " = " + data + ";\n";
+                    result += temp;
+                }
+            }
+        }
+    });
+    return result;
+}
+
 function dynamicFiles(){
     if ((options.assembly != "assembled" || options.assembly == "dynamic") && options.locales.length > 0){
         options.locales.forEach(function(lo){
@@ -108,34 +129,6 @@ function dynamicFiles(){
     }
 }
 
-function assemblFiles(dir){
-    var list = fs.readdirSync(dir);
-    list.forEach(function(file){
-        var fullPath = path.join(dir, file);
-        var stat = fs.statSync(fullPath);
-        if (stat && stat.isDirectory()){
-            assemblFiles(fullPath);
-        } else {
-            if (file === "strings.json"){
-                var data = fs.readFileSync(fullPath, "utf-8");
-                var dataKey = manipulateKey(fullPath);
-                if (data) {
-                    var temp = dataKey +  " = " + data + ";\n";
-                    result += temp;
-                }
-            }
-        }
-    });
-    return result;
-}
-
-if(options.assembly == "assembled"){
-    var result = assemblFiles(options.resDir);
-    wirteFiles(result);
-} else {
-    dynamicFiles();
-}
-
 function wirteFiles(writeData, filename){
     var writeName = filename || options.filename
     if (options.compiled == "compiled") {
@@ -144,4 +137,11 @@ function wirteFiles(writeData, filename){
     } else {
         fs.writeFileSync(path.join(options.outDir, writeName), writeData, 'utf-8');
     }
+}
+
+if(options.assembly == "assembled"){
+    var result = assemblFiles(options.resDir);
+    wirteFiles(result);
+} else {
+    dynamicFiles();
 }
