@@ -1,10 +1,13 @@
 {
   "name": "ilib-resbundler",
   "version": "1.0.0",
-  "description": "convert json resources to js file",
+  "description": "convert JSON type of resources to JS files",
   "main": "resbundler.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dist": "npm publish",
+    "test-clean": "rm -rf test/result",
+    "test-assemble": "cd test;../resbundler.js -o result",
+    "test-dynamic": "cd test;../resbundler.js -a dynamic -o result -l 'ko-KR,es-ES,zh-Hans-CN'"
   },
   "repository": {
     "type": "git",
@@ -23,5 +26,9 @@
   "bugs": {
     "url": "https://github.com/iLib-js/ilib-resbundler/issues"
   },
-  "homepage": "https://github.com/iLib-js/ilib-resbundler#readme"
+  "homepage": "https://github.com/iLib-js/ilib-resbundler#readme",
+  "devDependencies": {
+    "ilib-locale": "^1.1.0",
+    "uglify-js": "^3.14.5"
+  }
 }

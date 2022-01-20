@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /*
  * resbundler.js - convert JSON type of resources to JS files
  *
@@ -20,6 +21,7 @@
 var fs = require("fs");
 var path = require("path");
 var uglifyjs = require('uglify-js');
+var Locale = require("ilib-locale");
 
 function usage() {
     console.log("Usage: resbundler.js [-h] [-a assembly] [-c compiled] [-r resDir] [-o outDir] [-l locales]\n" +
@@ -29,15 +31,15 @@ function usage() {
       "-a or --assembly\n" +
       "  How you make the output. Valid values are 'assembled' and  'dynamic'. Default: 'assembled'.\n" +
       "-c or --compiled\n" +
-      "  Whether you want the output to be compiled with uglify-js. Valid values are 'compiled', and 'uncompiled'. Default: 'compiled'.");
+      "  Whether you want the output to be compiled with uglify-js. Valid values are 'compiled', and 'uncompiled'. Default: 'compiled'.\n" +
       "-r or --resDir\n" +
-      "  directory to read and file json files. Default: resources" +
+      "  directory to read and file json files. Default: 'resources'\n" +
       "-o or --outDir\n" +
-      "  directory to place output files. Default: current dir." +
+      "  directory to place output files. Default: current dir '.'\n" +
       "-f or --filename\n" +
-      "  specify output file name when assembly mode is assembled. Default: ilib-translation.js" +
+      "  specify output file name when assembly mode is assembled. Default: 'ilib-translation.js'\n" +
       "-l or --locales\n" +
-      "  Locales you want your make js files when assembely mode is `dynamic`. Value is a comma-separated list of BCP-47 style locale tags.";
+      "  Locales you want your make js files when assembely mode is `dynamic`. Value is a comma-separated list of BCP-47 style locale tags.");
     process.exit();
 }
 
@@ -86,13 +88,13 @@ function manipulateKey(fullPath){
     return key;
 }
 
-function assemblFiles(dir){
+function assembleFiles(dir){
     var list = fs.readdirSync(dir);
     list.forEach(function(file){
         var fullPath = path.join(dir, file);
         var stat = fs.statSync(fullPath);
         if (stat && stat.isDirectory()){
-            assemblFiles(fullPath);
+            assembleFiles(fullPath);
         } else {
             if (file === "strings.json"){
                 var data = fs.readFileSync(fullPath, "utf-8");
@@ -107,29 +109,51 @@ function assemblFiles(dir){
     return result;
 }
 
+function parseLocale(lo){
+    if(!lo) return;
+    var list=[];
+    var locale =new Locale(lo);
+    if (locale.getLanguage()){
+        list.push(locale.getLanguage());
+    }
+    if (locale.getScript()){
+        list.push(locale.getScript());
+    }
+    if (locale.getRegion()){
+        list.push(locale.getRegion());
+    }
+    return list;
+}
+
 function dynamicFiles(){
-    if ((options.assembly != "assembled" || options.assembly == "dynamic") && options.locales.length > 0){
-        options.locales.forEach(function(lo){
-            result = "";
-            lo.split("-").map(function(v, i, a){
-                var file = a.slice(0, i+1).join("/") + "/strings.json"
-                var respath = path.join(options.resDir, file);
-                if (fs.existsSync(respath)){
-                    var data = fs.readFileSync(respath, "utf-8");
-                    var dataKey = manipulateKey(respath);
-                    if (data){
-                        var temp = dataKey +  " =  " + data + ";\n";
-                        result +=temp;
+    if ((options.assembly != "assembled" || options.assembly == "dynamic")){
+        if (options.locales.length > 0) {
+            options.locales.forEach(function(lo){
+                result = "";
+                var loList = parseLocale(lo);
+                loList.map(function(current, index, arr){
+                    var file = arr.slice(0, index+1).join("/") + "/strings.json"
+                    var respath = path.join(options.resDir, file);
+                    if (fs.existsSync(respath)){
+                        var data = fs.readFileSync(respath, "utf-8");
+                        var dataKey = manipulateKey(respath);
+                        if (data){
+                            var temp = dataKey +  " =  " + data + ";\n";
+                            result +=temp;
+                        }
                     }
-                }
+                });
+                var filename = lo + ".js";
+                writeFiles(result, filename);
             });
-            var filename = lo + ".js";
-            wirteFiles(result, filename);
-        });
+        } else {
+            console.log("ERROR: Locale list are missing.");
+            process.exit(1);
+        }
     }
 }
 
-function wirteFiles(writeData, filename){
+function writeFiles(writeData, filename){
     var writeName = filename || options.filename
     if (options.compiled == "compiled") {
         var minifyResult = uglifyjs.minify(writeData);
@@ -137,11 +161,13 @@ function wirteFiles(writeData, filename){
     } else {
         fs.writeFileSync(path.join(options.outDir, writeName), writeData, 'utf-8');
     }
+    console.log("Generated [" + options.compiled + "] " + path.join(options.outDir, writeName) + " file.");
 }
 
 if(options.assembly == "assembled"){
-    var result = assemblFiles(options.resDir);
-    wirteFiles(result);
+    var result = assembleFiles(options.resDir);
+    writeFiles(result);
 } else {
     dynamicFiles();
 }
+console.log("DONE!!");

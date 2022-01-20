@@ -1,0 +1,8 @@
+{
+    "files": [
+        "strings.json",
+        "es/strings.json",
+        "ko/strings.json",
+        "zh/Hans/strings.json"
+    ]
+}
