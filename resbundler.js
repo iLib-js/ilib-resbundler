@@ -21,7 +21,7 @@
 var fs = require("fs");
 var path = require("path");
 var uglifyjs = require('uglify-js');
-var Locale = require("ilib-locale");
+var util =require("ilib-common").Utils;
 
 function usage() {
     console.log("Usage: resbundler.js [-h] [-a assembly] [-c compiled] [-r resDir] [-o outDir] [-l locales]\n" +
@@ -109,31 +109,16 @@ function assembleFiles(dir){
     return result;
 }
 
-function parseLocale(lo){
-    if(!lo) return;
-    var list=[];
-    var locale =new Locale(lo);
-    if (locale.getLanguage()){
-        list.push(locale.getLanguage());
-    }
-    if (locale.getScript()){
-        list.push(locale.getScript());
-    }
-    if (locale.getRegion()){
-        list.push(locale.getRegion());
-    }
-    return list;
-}
-
 function dynamicFiles(){
     if ((options.assembly != "assembled" || options.assembly == "dynamic")){
         if (options.locales.length > 0) {
             options.locales.forEach(function(lo){
                 result = "";
-                var loList = parseLocale(lo);
+                var loList = util.getLocFiles(lo, "strings.json").filter(function(item){
+                    return (item.indexOf("und") == -1)
+                });
                 loList.map(function(current, index, arr){
-                    var file = arr.slice(0, index+1).join("/") + "/strings.json"
-                    var respath = path.join(options.resDir, file);
+                    var respath = path.join(options.resDir, arr[index]);
                     if (fs.existsSync(respath)){
                         var data = fs.readFileSync(respath, "utf-8");
                         var dataKey = manipulateKey(respath);
