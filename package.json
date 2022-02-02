@@ -28,7 +28,7 @@
   },
   "homepage": "https://github.com/iLib-js/ilib-resbundler#readme",
   "devDependencies": {
-    "ilib-locale": "^1.1.0",
+    "ilib-common": "^1.0.1",
     "uglify-js": "^3.14.5"
   }
 }
