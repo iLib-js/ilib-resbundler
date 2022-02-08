@@ -33,3 +33,6 @@ Release Notes
 -------------
 ### 1.0.0
 Intial release
+
+### 1.0.1
+Update to add excutable `resbundler` file that would install into the PATH
