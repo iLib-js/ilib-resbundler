@@ -20,7 +20,7 @@ Usage
 1. Include all data in one `js` file.   
 Following command, Output fiile name would be `ilib-translation.js`
 ```
-resbundler.js --assembly assembled --compiled compiled --resDir resources --outDir=result
+resbundler.js --assembly assembled --compiled compiled --resDir resources --outDir result
 ```
 
 2. Generate `js` files per locale.   
