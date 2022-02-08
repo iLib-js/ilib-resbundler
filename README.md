@@ -3,7 +3,7 @@ resbundler is a command-line utility that generates js files from json type of r
 
 Installation
 ------------
-Use `npm install ilib-scanner` or `yarn add ilib-scanner` to install the scanner.
+Use `npm install ilib-resbundler` or `yarn add ilib-resbundler` to install the scanner.
 
 Then, make sure that node_modules/.bin is in your path.
 
@@ -31,8 +31,8 @@ resbundler.js --assembly dynamic --compiled compiled --resDir resources --outDir
 
 Release Notes
 -------------
-### 1.0.0
-Intial release
-
 ### 1.0.1
 Update to add excutable `resbundler` file that would install into the PATH
+
+### 1.0.0
+Initial release
