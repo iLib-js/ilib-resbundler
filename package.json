@@ -1,6 +1,6 @@
 {
   "name": "ilib-resbundler",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "convert JSON type of resources to JS files",
   "main": "resbundler.js",
   "bin":{
@@ -31,9 +31,7 @@
   },
   "homepage": "https://github.com/iLib-js/ilib-resbundler#readme",
   "dependencies": {
-    "ilib-common": "^1.0.1"
-  },
-  "devDependencies":{
+    "ilib-common": "^1.0.1",
     "uglify-js": "^3.14.5"
   }
 }
