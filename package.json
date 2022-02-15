@@ -32,9 +32,7 @@
   "homepage": "https://github.com/iLib-js/ilib-resbundler#readme",
   "dependencies": {
     "ilib-common": "^1.0.1",
-    "uglify-js": "^3.14.5"
-  },
-  "devDependencies": {
+    "uglify-js": "^3.14.5",
     "options-parser": "^0.4.0"
   }
 }
