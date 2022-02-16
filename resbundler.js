@@ -35,6 +35,12 @@ var defaultOptions = {
 var result = "";
 
 var optionConfig = {
+    help: {
+        short: "h",
+        showHelp: {
+            banner: 'Usage: ilib-resbundler [-h] [options] '
+        }
+    },
     assembly: {
         short: "a",
         "default": "assembled",
