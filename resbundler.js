@@ -83,9 +83,7 @@ if (outDir && !fs.existsSync(outDir)){
     fs.mkdirSync(outDir);
 };
 var outFileName = options.opt.outFileName || defaultOptions.filename;
-
 var locales = typeof(options.opt.locales) === "string" ? options.opt.locales.split(",") : defaultOptions.locales;
-
 
 function manipulateKey(fullPath){
     if (!fullPath) return;
