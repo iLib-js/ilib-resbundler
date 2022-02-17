@@ -22,11 +22,19 @@ Following command, Output fiile name would be `ilib-translation.js`
 ```
 resbundler.js --assembly=assembled --compilation=compiled --resDir=resources --outDir=result
 ```
+or
+```
+resbundler.js -a assembled -c compiled -r resources --o result
+```
 
 2. Generate `js` files per locale.   
 Following command, Output file would be `ko-KR.js, es-ES.js`
 ```
 resbundler.js --assembly=dynamic --compiled=compiled --resDir=resources --outDir=result --locales=ko-KR,es-ES
+```
+or
+```
+resbundler.js -a dynamic -c compiled -r resources -o result -l ko-KR,es-ES
 ```
 
 Release Notes
