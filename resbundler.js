@@ -34,40 +34,14 @@ var defaultOptions = {
 }
 var result = "";
 
-
-function usage() {
-    console.log("Usage: resbundler.js [-h] [-a assembly] [-c compilation] [-r resDir] [-o outDir] [-l locales]\n" +
-      "Convert json resource data to js file\n" +
-      "-h or --help\n" +
-      "  this help\n" +
-      "-a or --assembly\n" +
-      "  How you make the output. Valid values are 'assembled' and  'dynamic'. Default: 'assembled'.\n" +
-      "-c or --compilation\n" +
-      "  Whether you want the output to be compiled with uglify-js. Valid values are 'compiled', and 'uncompiled'. Default: 'compiled'.\n" +
-      "-r or --resDir\n" +
-      "  directory to read and file json files. Default: 'resources'\n" +
-      "-o or --outDir\n" +
-      "  directory to place output files. Default: current dir '.'\n" +
-      "-f or --filename\n" +
-      "  specify output file name when assembly mode is assembled. Default: 'ilib-translation.js'\n" +
-      "-l or --locales\n" +
-      "  Locales you want your make js files when assembely mode is `dynamic`. Value is a comma-separated list of BCP-47 style locale tags.");
-    process.exit();
-}
-
-var argv= process.argv;
-if (argv[2]== "--help" || argv[2]== "-h"){
-    usage();
-}
-
-var ignoreOutput = function(){};
-
 var optionConfig = {
     help: {
         short: "h",
         showHelp: {
             banner: 'Usage: ilib-resbundler [-h] [options] ',
-            output: ignoreOutput
+            output: function(msg){
+                console.log(msg);
+            }
         }
     },
     assembly: {
