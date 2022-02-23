@@ -21,30 +21,10 @@
 var fs = require("fs");
 var path = require("path");
 var uglifyjs = require('uglify-js');
+var OptionsParser = require("options-parser");
 var util =require("ilib-common").Utils;
 
-function usage() {
-    console.log("Usage: resbundler.js [-h] [-a assembly] [-c compiled] [-r resDir] [-o outDir] [-l locales]\n" +
-      "Convert json resource data to js file\n" +
-      "-h or --help\n" +
-      "  this help\n" +
-      "-a or --assembly\n" +
-      "  How you make the output. Valid values are 'assembled' and  'dynamic'. Default: 'assembled'.\n" +
-      "-c or --compiled\n" +
-      "  Whether you want the output to be compiled with uglify-js. Valid values are 'compiled', and 'uncompiled'. Default: 'compiled'.\n" +
-      "-r or --resDir\n" +
-      "  directory to read and file json files. Default: 'resources'\n" +
-      "-o or --outDir\n" +
-      "  directory to place output files. Default: current dir '.'\n" +
-      "-f or --filename\n" +
-      "  specify output file name when assembly mode is assembled. Default: 'ilib-translation.js'\n" +
-      "-l or --locales\n" +
-      "  Locales you want your make js files when assembely mode is `dynamic`. Value is a comma-separated list of BCP-47 style locale tags.");
-    process.exit();
-}
-
-var argv = process.argv;
-var options = {
+var defaultOptions = {
     assembly: "assembled",
     compiled: "compiled",
     resDir: "resources",
@@ -54,29 +34,59 @@ var options = {
 }
 var result = "";
 
-for (var i = 0; i < argv.length; i++){
-    var val = argv[i];
-    if (val === "-h" || val == "--help"){
-        usage();
-    } else if (val === "-a" || val === "--assembly"){
-        options.assembly = argv[++i];
-    } else if(val === "-c" || val === "--compiled"){
-        options.compiled = argv[++i];
-    } else if (val === "-r" || val === "--resDir"){
-        options.resDir = argv[++i];
-    } else if (val === "-o" || val === "--outDir"){
-        options.outDir = argv[++i];
-        if (!fs.existsSync(options.outDir)){
-            fs.mkdirSync(options.outDir);
+var optionConfig = {
+    help: {
+        short: "h",
+        showHelp: {
+            banner: 'Usage: ilib-resbundler [-h] [options] ',
+            output: function(msg){
+                console.log(msg);
+            }
         }
-    } else if (val === "-f" || val === "--filename"){
-        options.filename = argv[++i];
-    } else if (val === "-l" || val === "--locales"){
-        if (i < argv.length && argv[i+1]) {
-            options.locales = argv[++i].split(",");
-        }
+    },
+    assembly: {
+        short: "a",
+        "default": "assembled",
+        help: "How you make the output. Valid values are 'assembled' and  'dynamic'. Default: 'assembled'.",
+    },
+    compilation: {
+        short: "c",
+        "default": "compiled",
+        help: "Whether you want the output to be compiled with uglify-js. Valid values are 'compiled', and 'uncompiled'. Default: 'compiled'."
+    },
+    resDir: {
+        short: "r",
+        "default": "resources",
+        help: "directory to read and file json files. Default: 'resources'"
+    },
+    outDir: {
+        short: "o",
+        "default": ".",
+        help: "directory to place output files. Default: current dir '.'"
+    },
+    filename: {
+        short: "f",
+        "default": "ilib-translation.js",
+        help: "specify output file name when assembly mode is assembled. Default: 'ilib-translation.js'"
+    },
+    locales: {
+        short: "l",
+        "default": "",
+        help: "Locales you want your make js files when assembely mode is `dynamic`. Value is a comma-separated list of BCP-47 style locale tags."
     }
 }
+
+var options = OptionsParser.parse(optionConfig);
+
+var assembly = options.opt.assembly || defaultOptions.assembly;
+var compilation = options.opt.compilation || defaultOptions.compilation;
+var resDir = options.opt.resDir || defaultOptions.resDir;
+var outDir = options.opt.outDir || defaultOptions.outDir;
+if (outDir && !fs.existsSync(outDir)){
+    fs.mkdirSync(outDir);
+};
+var outFileName = options.opt.filename || defaultOptions.filename;
+var locales = typeof(options.opt.locales) === "string" ? options.opt.locales.split(",") : defaultOptions.locales;
 
 function manipulateKey(fullPath){
     if (!fullPath) return;
@@ -110,15 +120,15 @@ function assembleFiles(dir){
 }
 
 function dynamicFiles(){
-    if ((options.assembly != "assembled" || options.assembly == "dynamic")){
-        if (options.locales.length > 0) {
-            options.locales.forEach(function(lo){
+    if ((assembly != "assembled" || assembly == "dynamic")){
+        if (locales.length > 0) {
+            locales.forEach(function(lo){
                 result = "";
                 var loList = util.getLocFiles(lo, "strings.json").filter(function(item){
                     return (item.indexOf("und") == -1)
                 });
                 loList.map(function(current, index, arr){
-                    var respath = path.join(options.resDir, arr[index]);
+                    var respath = path.join(resDir, arr[index]);
                     if (fs.existsSync(respath)){
                         var data = fs.readFileSync(respath, "utf-8");
                         var dataKey = manipulateKey(respath);
@@ -128,8 +138,8 @@ function dynamicFiles(){
                         }
                     }
                 });
-                var filename = lo + ".js";
-                writeFiles(result, filename);
+                var file = lo + ".js";
+                writeFiles(result, file);
             });
         } else {
             console.log("ERROR: Locale list are missing.");
@@ -138,19 +148,19 @@ function dynamicFiles(){
     }
 }
 
-function writeFiles(writeData, filename){
-    var writeName = filename || options.filename
-    if (options.compiled == "compiled") {
+function writeFiles(writeData, file){
+    var writeName = file || outFileName;
+    if (compilation == "compiled") {
         var minifyResult = uglifyjs.minify(writeData);
-        fs.writeFileSync(path.join(options.outDir, writeName), minifyResult.code, 'utf-8');
+        fs.writeFileSync(path.join(outDir, writeName), minifyResult.code, 'utf-8');
     } else {
-        fs.writeFileSync(path.join(options.outDir, writeName), writeData, 'utf-8');
+        fs.writeFileSync(path.join(outDir, writeName), writeData, 'utf-8');
     }
-    console.log("Generated [" + options.compiled + "] " + path.join(options.outDir, writeName) + " file.");
+    console.log("Generated [" + compilation + "] " + path.join(outDir, writeName) + " file.");
 }
 
-if(options.assembly == "assembled"){
-    var result = assembleFiles(options.resDir);
+if(assembly == "assembled"){
+    var result = assembleFiles(resDir);
     writeFiles(result);
 } else {
     dynamicFiles();
