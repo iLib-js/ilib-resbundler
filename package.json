@@ -6,6 +6,9 @@
   "bin": {
     "ilib-resbundler": "./resbundler.js"
   },
+  "engines": {
+    "node": ">=10 <23"
+  },
   "scripts": {
     "dist": "npm publish",
     "test-clean": "rm -rf test/result",
